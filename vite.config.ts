@@ -2,7 +2,7 @@ import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: '/remix-react-router-addressbook',
+  base: '/remix-react-router-addressbook/',
   plugins: [
     reactRouter(
   )],
