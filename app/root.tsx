@@ -1,14 +1,31 @@
 import {
   Form,
+  Link,
+  Outlet,
   Scripts,
   ScrollRestoration,
   isRouteErrorResponse,
 } from "react-router";
 import type { Route } from "./+types/root";
-
+import { getContacts } from "./data";
 import appStylesHref from "./app.css?url";
 
-export default function App() {
+export async function clientLoader() {
+  const contacts = await getContacts();
+  return { contacts };
+}
+
+export function HydrateFallback() {
+  return (
+    <div id="loading-splash">
+      <div id="loading-splash-spinner" />
+      <p>Loading, hold your horses..</p>
+    </div>
+  )
+}
+
+export default function App({loaderData}: Route.ComponentProps) {
+  const {contacts} = loaderData;  
   return (
     <>
       <div id="sidebar">
@@ -29,15 +46,32 @@ export default function App() {
           </Form>
         </div>
         <nav>
-          <ul>
-            <li>
-              <a href={`/contacts/1`}>Your Name</a>
-            </li>
-            <li>
-              <a href={`/contacts/2`}>Your Friend</a>
-            </li>
-          </ul>
+          {contacts.length ? (  
+            <ul>
+              {contacts.map((contact) => (
+                <li key={contact.id}>
+                  <Link to={`/contacts/${contact.id}`}>
+                    {contact.first || contact.last ? (
+                      <>
+                        {contact.first} {contact.last}
+                      </>
+                    ) : (
+                      <i>No Name</i>
+                    )}
+                    {contact.favorite ? (
+                      <span> ★</span> 
+                    ): null}
+                  </Link>
+                  </li>
+              ))}
+            </ul>
+          ) : (
+            <p><i>No contacts</i></p>
+          )}
         </nav>
+      </div>
+      <div id="detail">
+        <Outlet />
       </div>
     </>
   );
@@ -66,7 +100,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 // The top most error boundary for the app, rendered when your app throws an error
 // For more information, see https://reactrouter.com/start/framework/route-module#errorboundary
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
+  let message = "Hey pal, sorry!";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
@@ -74,7 +108,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     message = error.status === 404 ? "404" : "Error";
     details =
       error.status === 404
-        ? "The requested page could not be found."
+        ? "What the heck! The requested page could not be found."
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
