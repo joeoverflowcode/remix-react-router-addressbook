@@ -1,6 +1,4 @@
 import {
-  Form,
-  Link,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -10,70 +8,19 @@ import type { Route } from "./+types/root";
 import { getContacts } from "./data";
 import appStylesHref from "./app.css?url";
 
-export async function clientLoader() {
-  const contacts = await getContacts();
-  return { contacts };
+
+
+
+export default function App() {
+  return <Outlet />
 }
 
 export function HydrateFallback() {
   return (
     <div id="loading-splash">
       <div id="loading-splash-spinner" />
-      <p>Loading, hold your horses..</p>
+      <p>Loading, please wait...</p>
     </div>
-  )
-}
-
-export default function App({loaderData}: Route.ComponentProps) {
-  const {contacts} = loaderData;  
-  return (
-    <>
-      <div id="sidebar">
-        <h1>React Router Contacts</h1>
-        <div>
-          <Form id="search-form" role="search">
-            <input
-              aria-label="Search contacts"
-              id="q"
-              name="q"
-              placeholder="Search"
-              type="search"
-            />
-            <div aria-hidden hidden={true} id="search-spinner" />
-          </Form>
-          <Form method="post">
-            <button type="submit">New</button>
-          </Form>
-        </div>
-        <nav>
-          {contacts.length ? (  
-            <ul>
-              {contacts.map((contact) => (
-                <li key={contact.id}>
-                  <Link to={`/contacts/${contact.id}`}>
-                    {contact.first || contact.last ? (
-                      <>
-                        {contact.first} {contact.last}
-                      </>
-                    ) : (
-                      <i>No Name</i>
-                    )}
-                    {contact.favorite ? (
-                      <span> ★</span> 
-                    ): null}
-                  </Link>
-                  </li>
-              ))}
-            </ul>
-          ) : (
-            <p><i>No contacts</i></p>
-          )}
-        </nav>
-      </div>
-      <div id="detail">
-        <Outlet />
-      </div>
-    </>
   );
 }
 
